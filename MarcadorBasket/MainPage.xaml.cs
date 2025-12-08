@@ -1,117 +1,113 @@
-// Namespace donde vive esta clase. Debe coincidir con lo puesto en x:Class del XAML.
+// Namespace del proyecto. Debe coincidir con x:Class="MarcadorBasket.MainPage" en el XAML.
 namespace MarcadorBasket;
 
-// Esta clase representa la pantalla principal de la app y hereda de ContentPage.
-// "partial" significa que parte de la clase está definida en el archivo generado del XAML.
+// MainPage es la pantalla principal. Hereda de ContentPage (página visual de MAUI).
+// "partial" indica que parte de la clase está generada por el XAML.
 public partial class MainPage : ContentPage
 {
-    // ================================================
-    //        VARIABLES DEL ESTADO DEL MARCADOR
-    // ================================================
+    // ==========================
+    //  ESTADO DEL MARCADOR
+    // ==========================
 
-    int scoreLocal = 0;         // Guarda los puntos del equipo local.
-    int scoreVisitante = 0;     // Guarda los puntos del equipo visitante.
+    int scoreLocal = 0;       // Puntos del equipo local.
+    int scoreVisitante = 0;   // Puntos del equipo visitante.
 
-    int periodo = 1;            // Número del periodo actual, iniciando en 1.
-    const int maxPeriodo = 4;   // Cantidad máxima de periodos permitidos.
+    int periodo = 1;          // Periodo actual del juego (1 a 4).
+    const int maxPeriodo = 4; // Número máximo de periodos.
 
-    int tiemposLocal = 3;       // Cantidad de tiempos fuera restantes del local.
-    int tiemposVisitante = 3;   // Cantidad de tiempos fuera restantes del visitante.
+    int tiemposLocal = 3;     // Tiempos fuera restantes del local.
+    int tiemposVisitante = 3; // Tiempos fuera restantes del visitante.
 
-    // Duración total del cuarto en minutos (TimeSpan permite manejar horas, minutos y segundos).
+    // Duración de cada cuarto (10 minutos).
     TimeSpan duracionCuarto = TimeSpan.FromMinutes(10);
 
-    // Tiempo restante del reloj de juego. Se inicializa luego en el constructor.
+    // Tiempo restante en el reloj de juego.
     TimeSpan tiempoJuegoRestante;
 
-    // Tiempo restante del reloj de posesión (24 segundos al iniciar).
+    // Tiempo restante en el reloj de posesión (24 segundos).
     TimeSpan tiempoPosRestante = TimeSpan.FromSeconds(24);
 
-    // Timers que ejecutan una acción cada cierto intervalo (usamos 1 segundo).
+    // Timers que descuentan tiempo cada segundo (juego y posesión).
     IDispatcherTimer timerJuego;
     IDispatcherTimer timerPos;
 
-    // Banderas que indican si el reloj está corriendo o detenido.
+    // Banderas para saber si los relojes están corriendo o pausados.
     bool juegoCorriendo = false;
     bool posesionCorriendo = false;
 
-    // ================================================
-    //         CONSTRUCTOR DE LA PÁGINA
-    // ================================================
+    // ==========================
+    //  CONSTRUCTOR DE LA PÁGINA
+    // ==========================
     public MainPage()
     {
-        // Carga todos los controles definidos en el archivo MainPage.xaml.
+        // Carga los controles definidos en MainPage.xaml y conecta x:Name con campos generados.
         InitializeComponent();
 
-        // Copiamos la duración del cuarto a la variable del tiempo restante del juego.
-        // Esto hace que el reloj empiece en 10:00.
+        // Inicializamos el tiempo de juego con la duración estándar del cuarto.
         tiempoJuegoRestante = duracionCuarto;
 
-        // Mandamos a actualizar todos los labels para que muestren valores iniciales.
+        // Pintamos en la pantalla los valores iniciales (score 0, periodo 1, tiempos 3, relojes).
         ActualizarMarcadores();
 
-        // ============================
-        // CONFIGURAR TIMER DE JUEGO
-        // ============================
-        timerJuego = Dispatcher.CreateTimer();               // Crea un timer asociado al hilo principal.
-        timerJuego.Interval = TimeSpan.FromSeconds(1);       // Timer ejecuta Tick cada 1 segundo.
-        timerJuego.Tick += TimerJuego_Tick;                  // Vinculamos el método a ejecutar cada segundo.
+        // Creamos y configuramos el timer del juego.
+        timerJuego = Dispatcher.CreateTimer();                   // Se crea el timer asociado al hilo de UI.
+        timerJuego.Interval = TimeSpan.FromSeconds(1);           // Tick cada 1 segundo.
+        timerJuego.Tick += TimerJuego_Tick;                      // Método a ejecutar en cada Tick.
 
-        // ============================
-        // CONFIGURAR TIMER DE POSESIÓN
-        // ============================
+        // Creamos y configuramos el timer de posesión.
         timerPos = Dispatcher.CreateTimer();
-        timerPos.Interval = TimeSpan.FromSeconds(1);         // Mismo intervalo de 1 segundo.
-        timerPos.Tick += TimerPos_Tick;                      // Método de posesión se ejecuta cada segundo.
+        timerPos.Interval = TimeSpan.FromSeconds(1);
+        timerPos.Tick += TimerPos_Tick;
     }
 
-    // ================================================
-    //   MÉTODO PARA REFRESCAR TODOS LOS LABELS EN PANTALLA
-    // ================================================
+    // ==========================
+    //  ACTUALIZAR PANTALLA
+    // ==========================
+    // Este método toma el estado interno (variables) y lo refleja en los Label de la UI.
     void ActualizarMarcadores()
     {
-        // Convierte el puntaje a texto y lo coloca en el label.
+        // Marcadores de puntos:
         lblScoreLocal.Text = scoreLocal.ToString();
         lblScoreVisitante.Text = scoreVisitante.ToString();
 
-        // Muestra el periodo actual.
+        // Periodo actual:
         lblPeriodo.Text = periodo.ToString();
 
-        // Muestra cuántos tiempos fuera le quedan a cada equipo.
+        // Tiempos fuera:
         lblTiemposLocal.Text = tiemposLocal.ToString();
         lblTiemposVisitante.Text = tiemposVisitante.ToString();
 
-        // Formateamos el reloj de juego a mm:ss con dos dígitos. Ejemplo: 09:05
+        // Reloj del juego en formato mm:ss (ejemplo: 09:05).
         lblRelojJuego.Text = $"{tiempoJuegoRestante.Minutes:00}:{tiempoJuegoRestante.Seconds:00}";
 
-        // Para la posesión solo mostramos los segundos con dos dígitos.
+        // Reloj de posesión solo en segundos (ejemplo: 24, 08, 00).
         lblRelojPosesion.Text = tiempoPosRestante.Seconds.ToString("00");
     }
 
-    // ================================================
-    //         BOTONES PARA SUMAR AL LOCAL
-    // ================================================
+    // ==========================
+    //  PUNTOS LOCAL
+    // ==========================
     void OnLocalMas1Clicked(object? sender, EventArgs e)
     {
-        scoreLocal += 1;       // Suma 1 punto al marcador local.
-        ActualizarMarcadores(); // Refresca la UI.
+        scoreLocal += 1;      // Suma 1 punto al local.
+        ActualizarMarcadores();
     }
 
     void OnLocalMas2Clicked(object? sender, EventArgs e)
     {
-        scoreLocal += 2;       // Suma 2 puntos al marcador local.
+        scoreLocal += 2;      // Suma 2 puntos al local.
         ActualizarMarcadores();
     }
 
     void OnLocalMas3Clicked(object? sender, EventArgs e)
     {
-        scoreLocal += 3;       // Suma 3 puntos al marcador local.
+        scoreLocal += 3;      // Suma 3 puntos al local.
         ActualizarMarcadores();
     }
 
-    // ================================================
-    //      BOTONES PARA SUMAR AL VISITANTE
-    // ================================================
+    // ==========================
+    //  PUNTOS VISITANTE
+    // ==========================
     void OnVisitMas1Clicked(object? sender, EventArgs e)
     {
         scoreVisitante += 1;
@@ -130,141 +126,123 @@ public partial class MainPage : ContentPage
         ActualizarMarcadores();
     }
 
-    // ================================================
-    //           TIEMPOS FUERA
-    // ================================================
+    // ==========================
+    //  TIEMPOS FUERA
+    // ==========================
     void OnTiempoLocalClicked(object? sender, EventArgs e)
     {
-        // IF: solo ejecuta el bloque si la condición es verdadera.
-        // tiempoLocal > 0 significa que aún quedan tiempos fuera disponibles.
+        // Solo permite pedir tiempo si aún quedan tiempos fuera.
         if (tiemposLocal > 0)
         {
-            tiemposLocal--;                        // Resta un tiempo fuera (tiemposLocal = tiemposLocal - 1).
-            lblMensaje.Text = "Tiempo fuera LOCAL"; // Muestra mensaje en pantalla.
-            ActualizarMarcadores();                // Actualiza el contador visual.
+            tiemposLocal--;                      // Resta 1 tiempo fuera.
+            lblMensaje.Text = "Tiempo fuera LOCAL";
+            ActualizarMarcadores();
         }
-        // Si tiemposLocal == 0, NO entra al if y no hace nada.
+        // Si llega a 0, no hace nada para evitar valores negativos.
     }
 
     void OnTiempoVisitClicked(object? sender, EventArgs e)
     {
-        if (tiemposVisitante > 0)                 // Evalúa si aún tiene tiempos fuera.
+        if (tiemposVisitante > 0)
         {
-            tiemposVisitante--;                   // Si sí tiene, le resta uno.
+            tiemposVisitante--;
             lblMensaje.Text = "Tiempo fuera VISITANTE";
             ActualizarMarcadores();
         }
     }
 
-    // ================================================
-    //         CONTROL DEL RELOJ DE JUEGO
-    // ================================================
+    // ==========================
+    //  CONTROL RELOJ DE JUEGO
+    // ==========================
     void OnStartStopJuegoClicked(object? sender, EventArgs e)
     {
-        // Alternamos el estado del booleano.
-        // Si estaba en true, pasa a false. Si estaba en false, pasa a true.
+        // Alterna el estado: si estaba corriendo, se pausa; si estaba pausado, se arranca.
         juegoCorriendo = !juegoCorriendo;
 
-        // IF para decidir si arrancar o pausar el timer.
         if (juegoCorriendo)
-            timerJuego.Start();      // Inicia el timer (TimerJuego_Tick empieza cada 1s)
+            timerJuego.Start();  // Comienza a ejecutar TimerJuego_Tick cada segundo.
         else
-            timerJuego.Stop();       // Detiene el timer (ya no llama a TimerJuego_Tick).
+            timerJuego.Stop();   // Detiene el timer.
     }
 
     void OnResetCuartoClicked(object? sender, EventArgs e)
     {
-        juegoCorriendo = false;        // Marcamos que ya no está corriendo.
-        timerJuego.Stop();             // Detenemos el timer.
-
-        // Volvemos a dejar el tiempo restante igual que la duración del cuarto.
+        // Detenemos el reloj y regresamos el tiempo al inicio del cuarto.
+        juegoCorriendo = false;
+        timerJuego.Stop();
         tiempoJuegoRestante = duracionCuarto;
-
-        ActualizarMarcadores();        // Refrescamos el UI.
+        ActualizarMarcadores();
     }
 
     void OnSiguientePeriodoClicked(object? sender, EventArgs e)
     {
-        // IF: solo avanza el periodo si aún no alcanzamos el máximo.
+        // Solo avanzamos si aún no llegamos al último periodo.
         if (periodo < maxPeriodo)
         {
-            periodo++;                          // Incrementa en 1 (periodo = periodo + 1).
-            tiempoJuegoRestante = duracionCuarto; // Reinicia el tiempo del cuarto.
-            juegoCorriendo = false;             // Se detiene el reloj.
+            periodo++;                      // Pasa al siguiente periodo.
+            tiempoJuegoRestante = duracionCuarto; // Reinicia el tiempo del reloj.
+            juegoCorriendo = false;
             timerJuego.Stop();
             ActualizarMarcadores();
         }
-        // Si periodo == maxPeriodo NO hace nada.
     }
 
-    // ================================================
-    //   MÉTODO QUE SE EJECUTA CADA 1 SEGUNDO (juego)
-    // ================================================
+    // Este método se ejecuta automáticamente cada segundo cuando timerJuego está activo.
     void TimerJuego_Tick(object? sender, EventArgs e)
     {
-        // IF: revisa si todavía hay tiempo restante.
         if (tiempoJuegoRestante.TotalSeconds > 0)
         {
-            // Resta exactamente 1 segundo al TimeSpan.
-            // TimeSpan no se modifica directamente; se crea un nuevo TimeSpan restando 1 segundo.
+            // Restamos exactamente 1 segundo al TimeSpan.
             tiempoJuegoRestante -= TimeSpan.FromSeconds(1);
-
-            // Actualiza los labels para mostrar el nuevo valor.
             ActualizarMarcadores();
         }
         else
         {
-            // Cuando el tiempo llega a 0 segundos:
-            juegoCorriendo = false;      // Marcamos que se debe detener el reloj.
-            timerJuego.Stop();           // Detenemos el timer.
-            lblMensaje.Text = "Fin del periodo";  // Mostramos mensaje.
+            // Cuando el tiempo llega a 0, se detiene el juego para ese periodo.
+            juegoCorriendo = false;
+            timerJuego.Stop();
+            lblMensaje.Text = "Fin del periodo";
         }
     }
 
-    // ================================================
-    //        CONTROL DEL RELOJ DE POSESIÓN
-    // ================================================
+    // ==========================
+    //  CONTROL RELOJ DE POSESIÓN
+    // ==========================
     void OnStartStopPosesionClicked(object? sender, EventArgs e)
     {
-        // Alterna entre iniciar y pausar el reloj.
+        // Alterna el estado del reloj de posesión.
         posesionCorriendo = !posesionCorriendo;
 
         if (posesionCorriendo)
-            timerPos.Start();    // Inicia el timer
+            timerPos.Start();
         else
-            timerPos.Stop();     // Lo detiene
+            timerPos.Stop();
     }
 
     void OnReset24Clicked(object? sender, EventArgs e)
     {
-        // Vuelve a poner la posesión en 24 segundos.
+        // Vuelve la posesión a 24 segundos y detiene el reloj.
         tiempoPosRestante = TimeSpan.FromSeconds(24);
-
-        posesionCorriendo = false; // Aseguramos que está pausado.
+        posesionCorriendo = false;
         timerPos.Stop();
-
-        ActualizarMarcadores();  // Refresca UI.
+        ActualizarMarcadores();
     }
 
-    // ================================================
-    // MÉTODO QUE SE EJECUTA CADA 1s EN LA POSESIÓN
-    // ================================================
+    // Método que se ejecuta cada segundo cuando timerPos está activo.
     void TimerPos_Tick(object? sender, EventArgs e)
     {
-        // IF: si aún quedan segundos en la posesión.
         if (tiempoPosRestante.TotalSeconds > 0)
         {
-            // Restamos 1 segundo exactamente igual que el reloj de juego.
+            // Restamos 1 segundo a la posesión.
             tiempoPosRestante -= TimeSpan.FromSeconds(1);
-            ActualizarMarcadores();     // Refrescamos pantalla.
+            ActualizarMarcadores();
         }
         else
         {
-            // Si el reloj llegó a 0, significa violación de 24 segundos.
-            posesionCorriendo = false; // Detenemos la bandera.
-            timerPos.Stop();           // Detenemos el timer.
-            lblMensaje.Text = "Violación de 24 s"; // Mostramos mensaje.
+            // Si se agota el tiempo de posesión, se marca violación de 24 segundos.
+            posesionCorriendo = false;
+            timerPos.Stop();
+            lblMensaje.Text = "Violación de 24 s";
         }
     }
 }
-
