@@ -1,282 +1,325 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Página principal del marcador de basketball, hecha con .NET MAUI -->
-
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MarcadorBasket.MainPage"
              BackgroundColor="Black">
-    <!-- ContentPage:
-         - Es la pantalla base de MAUI.
-         - x:Class conecta este XAML con la clase C# MarcadorBasket.MainPage.
-         - BackgroundColor pone fondo negro tipo tablero deportivo. -->
 
-    <!-- GRID PRINCIPAL: 3 FILAS
-         Fila 0: zona de marcadores (arriba)
-         Fila 1: zona de botones (centro)
-         Fila 2: mensaje de estado (abajo) -->
-    <Grid RowDefinitions="Auto,*,Auto">
+    <!-- Estilos generales para botones -->
+    <ContentPage.Resources>
+        <Style TargetType="Button" x:Key="BaseButton">
+            <Setter Property="TextColor" Value="Black" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="HeightRequest" Value="36" />
+            <Setter Property="FontAttributes" Value="Bold" />
+        </Style>
 
-        <!-- =======================================================
-             FILA 0 (Grid.Row="0"): MARCADORES LOCAL / CENTRO / VISITANTE
-             ======================================================= -->
+        <!-- Botones de sumar puntos -->
+        <Style TargetType="Button" x:Key="ScorePlusButton" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="BackgroundColor" Value="#00E676" />
+            <!-- Verde -->
+        </Style>
+
+        <!-- Botones de restar puntos -->
+        <Style TargetType="Button" x:Key="ScoreMinusButton" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="BackgroundColor" Value="#FF5252" />
+            <!-- Rojo -->
+        </Style>
+
+        <!-- Botones de tiempo fuera -->
+        <Style TargetType="Button" x:Key="TimeoutButton" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="BackgroundColor" Value="#FFB300" />
+            <!-- Naranja -->
+        </Style>
+
+        <!-- Botones de reloj de juego -->
+        <Style TargetType="Button" x:Key="GameClockButton" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="BackgroundColor" Value="#2979FF" />
+            <!-- Azul -->
+            <Setter Property="TextColor" Value="White" />
+        </Style>
+
+        <!-- Botones de reloj de posesión -->
+        <Style TargetType="Button" x:Key="ShotClockButton" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="BackgroundColor" Value="#455A64" />
+            <!-- Gris azulado -->
+            <Setter Property="TextColor" Value="White" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*,Auto"
+          Padding="10">
+
+        <!-- ======================================================
+             FILA 0 — ZONA PRINCIPAL (LOCAL | CENTRO | VISITANTE)
+             ====================================================== -->
         <Grid Grid.Row="0"
-              ColumnDefinitions="*,Auto,*"
-              Padding="20">
-            <!-- Este Grid interno divide la fila superior en 3 columnas:
-                 - Columna 0: datos del equipo LOCAL
-                 - Columna 1: periodo y relojes
-                 - Columna 2: datos del equipo VISITANTE
-                 Padding añade margen interno alrededor de los marcadores. -->
+              ColumnDefinitions="Auto,*,Auto"
+              ColumnSpacing="12">
 
-            <!-- ===========================
+            <!-- ==========================
                  COLUMNA 0: EQUIPO LOCAL
-                 =========================== -->
-            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
-                <!-- VerticalStackLayout apila los controles en columna.
-                     Grid.Column="0" indica que va en la primera columna.
-                     HorizontalOptions="Center" centra el contenido en la columna. -->
+                 ========================== -->
+            <VerticalStackLayout Grid.Column="0"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 Spacing="10">
 
-                <!-- Etiqueta fija con el título "LOCAL" -->
                 <Label Text="LOCAL"
                        TextColor="White"
-                       FontSize="24" />
+                       FontSize="20"
+                       HorizontalOptions="Center" />
 
-                <!-- PUNTOS DEL LOCAL:
-                     - x:Name permite modificar este Label desde C#.
-                     - Texto inicial 0, color verde y tamaño grande. -->
                 <Label x:Name="lblScoreLocal"
                        Text="0"
-                       TextColor="Lime"
-                       FontSize="64"
-                       FontAttributes="Bold" />
-
-                <!-- Título para la sección de tiempos fuera del local -->
-                <Label Text="Tiempos fuera"
-                       TextColor="White" />
-
-                <!-- TIEMPOS FUERA DEL LOCAL:
-                     - Muestra cuántos tiempos fuera le quedan al local.
-                     - Inicia en 3. -->
-                <Label x:Name="lblTiemposLocal"
-                       Text="3"
                        TextColor="Yellow"
-                       FontSize="24" />
-            </VerticalStackLayout>
+                       FontSize="42"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
 
-            <!-- ===========================
-                 COLUMNA 1: CENTRO (PERIODO + RELOJES)
-                 =========================== -->
-            <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
-                <!-- Columna central con periodo, reloj principal y posesión -->
-
-                <!-- Título "PERIODO" -->
-                <Label Text="PERIODO"
-                       TextColor="White"
-                       FontSize="18" />
-
-                <!-- NÚMERO DE PERIODO:
-                     - x:Name="lblPeriodo" permite actualizarlo en C#.
-                     - Inicia en 1. -->
-                <Label x:Name="lblPeriodo"
-                       Text="1"
-                       TextColor="Red"
-                       FontSize="40" />
-
-                <!-- Título "RELOJ JUEGO" (tiempo total del cuarto) -->
-                <Label Text="RELOJ JUEGO"
-                       TextColor="White" />
-
-                <!-- RELOJ DE JUEGO:
-                     - Muestra minutos y segundos del cuarto.
-                     - Inicia en "10:00". -->
-                <Label x:Name="lblRelojJuego"
-                       Text="10:00"
-                       TextColor="Red"
-                       FontSize="48"
-                       FontAttributes="Bold" />
-
-                <!-- Título "POSESIÓN" (reloj de 24 segundos) -->
-                <Label Text="POSESIÓN"
-                       TextColor="White" />
-
-                <!-- RELOJ DE POSESIÓN:
-                     - Muestra cuántos segundos quedan en la posesión.
-                     - Inicia en "24". -->
-                <Label x:Name="lblRelojPosesion"
-                       Text="24"
-                       TextColor="Red"
-                       FontSize="36" />
-            </VerticalStackLayout>
-
-            <!-- ===========================
-                 COLUMNA 2: EQUIPO VISITANTE
-                 =========================== -->
-            <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center">
-                <!-- Mismos elementos que el equipo local, pero para visitante -->
-
-                <!-- Título "VISITANTE" -->
-                <Label Text="VISITANTE"
-                       TextColor="White"
-                       FontSize="24" />
-
-                <!-- PUNTOS DEL VISITANTE -->
-                <Label x:Name="lblScoreVisitante"
-                       Text="0"
-                       TextColor="Lime"
-                       FontSize="64"
-                       FontAttributes="Bold" />
-
-                <!-- Título "Tiempos fuera" para visitante -->
-                <Label Text="Tiempos fuera"
-                       TextColor="White" />
-
-                <!-- TIEMPOS FUERA DEL VISITANTE -->
-                <Label x:Name="lblTiemposVisitante"
-                       Text="3"
-                       TextColor="Yellow"
-                       FontSize="24" />
-            </VerticalStackLayout>
-
-        </Grid>
-        <!-- Fin de la fila de marcadores -->
-
-
-        <!-- =======================================================
-             FILA 1 (Grid.Row="1"): BOTONES DE PUNTOS Y RELOJES
-             ======================================================= -->
-        <Grid Grid.Row="1"
-              RowDefinitions="Auto,Auto"
-              ColumnDefinitions="*,*"
-              Padding="20">
-            <!-- Este Grid tiene:
-                 - 2 filas:
-                   · Fila 0: botones de puntos y tiempos fuera
-                   · Fila 1: controles de relojes
-                 - 2 columnas:
-                   · Columna 0: controles para LOCAL
-                   · Columna 1: controles para VISITANTE -->
-
-            <!-- ===========================
-                 FILA 0, COLUMNA 0: PUNTOS Y TIEMPOS DEL LOCAL
-                 =========================== -->
-            <VerticalStackLayout Grid.Row="0" Grid.Column="0">
-                <!-- Contenedor vertical sólo para el equipo local -->
-
-                <!-- Título para los puntos del local -->
-                <Label Text="Puntos LOCAL"
-                       TextColor="White" />
-
-                <!-- Botones para sumar puntos al local -->
-                <HorizontalStackLayout Spacing="10">
-                    <!-- HorizontalStackLayout alinea los botones en fila. -->
-
-                    <!-- Suma +1 punto al local (OnLocalMas1Clicked en C#) -->
-                    <Button Text="+1" Clicked="OnLocalMas1Clicked" />
-
-                    <!-- Suma +2 puntos al local -->
-                    <Button Text="+2" Clicked="OnLocalMas2Clicked" />
-
-                    <!-- Suma +3 puntos al local -->
-                    <Button Text="+3" Clicked="OnLocalMas3Clicked" />
+                <HorizontalStackLayout Spacing="6">
+                    <Button Text="+1"
+                            WidthRequest="70"
+                            Style="{StaticResource ScorePlusButton}"
+                            Clicked="OnLocalMas1Clicked" />
+                    <Button Text="-1"
+                            WidthRequest="70"
+                            Style="{StaticResource ScoreMinusButton}"
+                            Clicked="OnLocalMenos1Clicked" />
                 </HorizontalStackLayout>
 
-                <!-- Título para tiempo fuera del local -->
-                <Label Text="Tiempo fuera LOCAL"
-                       TextColor="White" />
+                <Label Text="Tiempos fuera"
+                       TextColor="White"
+                       FontSize="14"
+                       HorizontalOptions="Center" />
 
-                <!-- Botón para pedir tiempo fuera:
-                     - Llama al método OnTiempoLocalClicked en C#. -->
-                <Button Text="Pedir tiempo"
+                <Label x:Name="lblTiemposLocal"
+                       Text="3"
+                       TextColor="Red"
+                       FontSize="20"
+                       HorizontalOptions="Center" />
+
+                <Button Text="Tiempo"
+                        WidthRequest="90"
+                        Style="{StaticResource TimeoutButton}"
                         Clicked="OnTiempoLocalClicked" />
             </VerticalStackLayout>
 
-            <!-- ===========================
-                 FILA 0, COLUMNA 1: PUNTOS Y TIEMPOS DEL VISITANTE
-                 =========================== -->
-            <VerticalStackLayout Grid.Row="0" Grid.Column="1">
-                <!-- Contenedor vertical sólo para el visitante -->
 
-                <!-- Título para los puntos del visitante -->
-                <Label Text="Puntos VISITANTE"
-                       TextColor="White" />
 
-                <!-- Botones para sumar puntos al visitante -->
-                <HorizontalStackLayout Spacing="10">
-                    <!-- Suma +1 punto al visitante -->
-                    <Button Text="+1" Clicked="OnVisitMas1Clicked" />
+            <!-- ================================================
+                 COLUMNA 1: TABLERO CENTRAL + RELOJES
+                 ================================================ -->
+            <VerticalStackLayout Grid.Column="1"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 Spacing="10">
 
-                    <!-- Suma +2 puntos al visitante -->
-                    <Button Text="+2" Clicked="OnVisitMas2Clicked" />
+                <!-- ==== TABLERO CENTRAL ===== -->
+                <Frame Padding="10"
+                       BackgroundColor="#202020"
+                       CornerRadius="8"
+                       HasShadow="True">
 
-                    <!-- Suma +3 puntos al visitante -->
-                    <Button Text="+3" Clicked="OnVisitMas3Clicked" />
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                          ColumnDefinitions="*,Auto,*"
+                          ColumnSpacing="8"
+                          RowSpacing="4">
+
+                        <!-- FILA 0: NOMBRES -->
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="LOCAL"
+                               TextColor="White"
+                               FontSize="14"
+                               HorizontalTextAlignment="Center" />
+
+                        <Label Grid.Row="0" Grid.Column="1"
+                               Text="PERIODO"
+                               TextColor="White"
+                               FontSize="14"
+                               HorizontalTextAlignment="Center" />
+
+                        <Label Grid.Row="0" Grid.Column="2"
+                               Text="VISITANTE"
+                               TextColor="White"
+                               FontSize="14"
+                               HorizontalTextAlignment="Center" />
+
+                        <!-- FILA 1: MARCADORES -->
+                        <Label Grid.Row="1" Grid.Column="0"
+                               Text="{Binding Source={x:Reference lblScoreLocal}, Path=Text}"
+                               TextColor="Yellow"
+                               FontSize="34"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center" />
+
+                        <Label Grid.Row="1" Grid.Column="1"
+                               x:Name="lblPeriodo"
+                               Text="1"
+                               TextColor="Red"
+                               FontSize="26"
+                               HorizontalTextAlignment="Center" />
+
+                        <Label Grid.Row="1" Grid.Column="2"
+                               Text="{Binding Source={x:Reference lblScoreVisitante}, Path=Text}"
+                               TextColor="Yellow"
+                               FontSize="34"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center" />
+
+                        <!-- FILA 2: POSESION -->
+                        <Label Grid.Row="2" Grid.ColumnSpan="3"
+                               Text="POSESIÓN"
+                               TextColor="White"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center" />
+
+                        <Label Grid.Row="3" Grid.ColumnSpan="3"
+                               x:Name="lblRelojPosesion"
+                               Text="24"
+                               TextColor="Red"
+                               FontSize="26"
+                               HorizontalTextAlignment="Center" />
+                    </Grid>
+                </Frame>
+
+                <!-- Reloj de juego -->
+                <Label x:Name="lblRelojJuego"
+                       Text="10:00"
+                       TextColor="Yellow"
+                       FontSize="34"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
+
+                <!-- =======================================
+                     BOTONES INICIAR/PAUSAR JUEGO Y POSESIÓN
+                     ======================================= -->
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="12"
+                      HorizontalOptions="Center">
+
+                    <!-- COLUMNA 0 — JUEGO -->
+                    <VerticalStackLayout Grid.Column="0"
+                                         Spacing="4"
+                                         HorizontalOptions="Center">
+                        <Label Text="Juego"
+                               TextColor="White"
+                               FontSize="12"
+                               HorizontalOptions="Center" />
+
+                        <Button Text="Iniciar / Pausar"
+                                WidthRequest="140"
+                                FontSize="12"
+                                Style="{StaticResource GameClockButton}"
+                                Clicked="OnStartStopJuegoClicked" />
+                    </VerticalStackLayout>
+
+                    <!-- COLUMNA 1 — POSESIÓN -->
+                    <VerticalStackLayout Grid.Column="1"
+                                         Spacing="4"
+                                         HorizontalOptions="Center">
+                        <Label Text="Posesión"
+                               TextColor="White"
+                               FontSize="12"
+                               HorizontalOptions="Center" />
+
+                        <Button Text="Iniciar / Pausar"
+                                WidthRequest="140"
+                                FontSize="12"
+                                Style="{StaticResource ShotClockButton}"
+                                Clicked="OnStartStopPosesionClicked" />
+                    </VerticalStackLayout>
+
+                </Grid>
+
+                <!-- =======================================
+                     FILA ÚNICA: REINICIAR, RESET 24, SIG. PERIODO
+                     ======================================= -->
+                <HorizontalStackLayout Spacing="10"
+                                       HorizontalOptions="Center"
+                                       Margin="0,-1,0,0">
+
+                    <Button Text="Reiniciar cuarto"
+                            WidthRequest="130"
+                            FontSize="12"
+                            Style="{StaticResource GameClockButton}"
+                            Clicked="OnResetCuartoClicked" />
+
+                    <Button Text="Reset 24"
+                            WidthRequest="110"
+                            FontSize="12"
+                            Style="{StaticResource ShotClockButton}"
+                            Clicked="OnReset24Clicked" />
+
+                    <Button Text="Siguiente periodo"
+                            WidthRequest="130"
+                            FontSize="12"
+                            Style="{StaticResource GameClockButton}"
+                            Clicked="OnSiguientePeriodoClicked" />
                 </HorizontalStackLayout>
 
-                <!-- Título para tiempo fuera del visitante -->
-                <Label Text="Tiempo fuera VISITANTE"
-                       TextColor="White" />
+            </VerticalStackLayout>
 
-                <!-- Botón para pedir tiempo fuera del visitante -->
-                <Button Text="Pedir tiempo"
+
+
+            <!-- ==========================
+                 COLUMNA 2: EQUIPO VISITANTE
+                 ========================== -->
+            <VerticalStackLayout Grid.Column="2"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 Spacing="10">
+
+                <Label Text="VISITANTE"
+                       TextColor="White"
+                       FontSize="20"
+                       HorizontalOptions="Center" />
+
+                <Label x:Name="lblScoreVisitante"
+                       Text="0"
+                       TextColor="Yellow"
+                       FontSize="42"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
+
+                <HorizontalStackLayout Spacing="6">
+                    <Button Text="+1"
+                            WidthRequest="70"
+                            Style="{StaticResource ScorePlusButton}"
+                            Clicked="OnVisitMas1Clicked" />
+                    <Button Text="-1"
+                            WidthRequest="70"
+                            Style="{StaticResource ScoreMinusButton}"
+                            Clicked="OnVisitMenos1Clicked" />
+                </HorizontalStackLayout>
+
+                <Label Text="Tiempos fuera"
+                       TextColor="White"
+                       FontSize="14"
+                       HorizontalOptions="Center" />
+
+                <Label x:Name="lblTiemposVisitante"
+                       Text="3"
+                       TextColor="Red"
+                       FontSize="20"
+                       HorizontalOptions="Center" />
+
+                <Button Text="Tiempo"
+                        WidthRequest="90"
+                        Style="{StaticResource TimeoutButton}"
                         Clicked="OnTiempoVisitClicked" />
             </VerticalStackLayout>
 
-            <!-- ===========================
-                 FILA 1, COLUMNAS 0-1: CONTROLES DE RELOJES
-                 =========================== -->
-            <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2">
-                <!-- Este contenedor ocupa las dos columnas (ColumnSpan="2")
-                     porque los controles de reloj aplican al juego completo,
-                     no a un solo equipo. -->
-
-                <!-- Título para el reloj de juego -->
-                <Label Text="Reloj de juego"
-                       TextColor="White" />
-
-                <!-- Controles del reloj principal de juego -->
-                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <!-- Botón para iniciar o pausar el reloj de juego -->
-                    <Button Text="Iniciar / Pausar" Clicked="OnStartStopJuegoClicked" />
-
-                    <!-- Botón para reiniciar el tiempo del cuarto a 10:00 -->
-                    <Button Text="Reiniciar cuarto" Clicked="OnResetCuartoClicked" />
-
-                    <!-- Botón para pasar al siguiente periodo -->
-                    <Button Text="Siguiente periodo" Clicked="OnSiguientePeriodoClicked" />
-                </HorizontalStackLayout>
-
-                <!-- Título para el reloj de posesión -->
-                <Label Text="Reloj de posesión"
-                       TextColor="White" />
-
-                <!-- Controles del reloj de posesión (24s) -->
-                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <!-- Botón para iniciar/pausar el reloj de posesión -->
-                    <Button Text="Iniciar / Pausar" Clicked="OnStartStopPosesionClicked" />
-
-                    <!-- Botón para resetear la posesión a 24s -->
-                    <Button Text="Reset 24" Clicked="OnReset24Clicked" />
-                </HorizontalStackLayout>
-            </VerticalStackLayout>
-
         </Grid>
-        <!-- Fin de la fila de botones y relojes -->
 
-
-        <!-- =======================================================
-             FILA 2 (Grid.Row="2"): MENSAJE DE ESTADO
-             ======================================================= -->
-        <Label Grid.Row="2"
+        <!-- ==========================
+             FILA 1 — MENSAJE
+             ========================== -->
+        <Label Grid.Row="1"
                x:Name="lblMensaje"
                Text=""
                TextColor="White"
-               HorizontalOptions="Center" />
-        <!-- lblMensaje:
-             - Se usa para mostrar mensajes como
-               "Tiempo fuera LOCAL", "Fin del periodo",
-               "Violación de 24 s".
-             - Inicia en vacío ("").
-             - Se centra horizontalmente. -->
+               HorizontalOptions="Center"
+               Margin="0,4,0,0" />
 
     </Grid>
 </ContentPage>

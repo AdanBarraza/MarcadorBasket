@@ -93,16 +93,13 @@ public partial class MainPage : ContentPage
         ActualizarMarcadores();
     }
 
-    void OnLocalMas2Clicked(object? sender, EventArgs e)
+    void OnLocalMenos1Clicked(object? sender, EventArgs e)
     {
-        scoreLocal += 2;      // Suma 2 puntos al local.
-        ActualizarMarcadores();
-    }
-
-    void OnLocalMas3Clicked(object? sender, EventArgs e)
-    {
-        scoreLocal += 3;      // Suma 3 puntos al local.
-        ActualizarMarcadores();
+        if (scoreLocal > 0)   // Evita que baje de 0
+        {
+            scoreLocal -= 1;
+            ActualizarMarcadores();
+        }
     }
 
     // ==========================
@@ -114,16 +111,13 @@ public partial class MainPage : ContentPage
         ActualizarMarcadores();
     }
 
-    void OnVisitMas2Clicked(object? sender, EventArgs e)
+    void OnVisitMenos1Clicked(object? sender, EventArgs e)
     {
-        scoreVisitante += 2;
-        ActualizarMarcadores();
-    }
-
-    void OnVisitMas3Clicked(object? sender, EventArgs e)
-    {
-        scoreVisitante += 3;
-        ActualizarMarcadores();
+        if (scoreVisitante > 0)
+        {
+            scoreVisitante -= 1;
+            ActualizarMarcadores();
+        }
     }
 
     // ==========================
